@@ -22,5 +22,5 @@ draft_order.index.name = 'Pick'
 draft_order.columns = ['Team']
 draft_order.index += 1
 
-# Print draft order
-print(draft_order)
+# Save final draft order
+#draft_order.to_csv('data/draft_order.csv')

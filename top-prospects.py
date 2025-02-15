@@ -1,4 +1,3 @@
-import re
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -32,5 +31,5 @@ top_300.rename(columns = {0: 'School'}, inplace = True)
 top_300 = top_300[['Rank', 'Name', 'Position', 'School']]
 top_300.set_index('Rank', inplace = True)
 
-# Print top 300 prospects
-print(top_300)
+# Save to CSV
+#top_300.to_csv('data/pff_2025_top300.csv')
