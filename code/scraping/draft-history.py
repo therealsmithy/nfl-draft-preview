@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import time
 import numpy as np
 import re
+import csv
 
 # Scrape first rounders from 2020-2024
 first_rounders = pd.DataFrame()
@@ -25,8 +26,12 @@ for i in range(2020, 2025):
     time.sleep(np.random.uniform(1, 10, 1)[0])
 
 # Only want players
-first_rounders_list = first_rounders['Player'].to_list()
-first_rounders_list = [re.sub(r'\W+$', '', x) for x in first_rounders_list]
+first_rounders_complete = first_rounders['Player']
+first_rounders_complete = [re.sub(r'\W+$', '', x) for x in first_rounders_complete]
 
 # Save to csv
-first_rounders.to_csv('data/2020_to_2024_first_rounders.csv', index=False)
+#with open('data/2020_to_2024_first_rounders.csv', 'w', newline='') as f:
+#    writer = csv.writer(f)
+#    writer.writerow(['Player'])
+#    for player in first_rounders_complete:
+#        writer.writerow([player])
