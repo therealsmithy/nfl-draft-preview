@@ -20,6 +20,8 @@ report_25 = pd.read_csv('data/scoutingreports/jeremiah_2025.csv')
 # Combine reports
 reports_past = pd.concat([report_20, report_21, report_22, report_23, report_24])
 
+# 1ST: BINARY CLASSIFICATION - Predict if a prospect will be a first rounder based on their scouting report
+
 # Dummy first rounders
 reports_past['first_rounder'] = reports_past['Name'].isin(first_rounders['Player']).astype(int)
 
@@ -211,3 +213,5 @@ plt.show()
 # uh oh...
 xgb.plot_importance(model, max_num_features = 10)
 plt.show()
+
+# 2ND: REGRESSION - Predict the exact draft position of a top 50 prospect based on their scouting report
