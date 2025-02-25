@@ -1,6 +1,6 @@
 # Scouting Report Predictability
 ## How the Words of One NFL Insider Relate to a Player's Chance to Go in the First
-
+================
 ## Introduction
 Professional sports "insiders" are paid a lot of money for their insights and analysis on the game they claim to know. But how much of what they say actually holds up in practice? Daniel Jeremiah is a former NFL scot and current NFL Network analyst who posts his ideas on the top 50 prospects in the NFL draft every year. This project will analyze the relationship between his scouting reports and the actual draft results to see how well his words hold up.
 <p align="center">
@@ -193,16 +193,17 @@ import matplotlib.pyplot as plt
 import dalex as dx
 import shap
 import numpy as np
+import pandas as pd
 
 # Read in data
-first_rounders = pd.read_csv('data/2020_to_2024_first_rounders.csv')
-report_20 = pd.read_csv('data/scoutingreports/jeremiah_2020.csv')
-report_21 = pd.read_csv('data/scoutingreports/jeremiah_2021.csv')
-report_22 = pd.read_csv('data/scoutingreports/jeremiah_2022.csv')
-report_23 = pd.read_csv('data/scoutingreports/jeremiah_2023.csv')
-report_24 = pd.read_csv('data/scoutingreports/jeremiah_2024.csv')
-report_25 = pd.read_csv('data/scoutingreports/jeremiah_2025.csv')
-stopwords = pd.read_csv('data/stopwords.csv')
+first_rounders = pd.read_csv('G:/My Drive/Py Projects/nfl-draft-preview/data/2020_to_2024_first_rounders.csv')
+report_20 = pd.read_csv('G:/My Drive/Py Projects/nfl-draft-preview/data/scoutingreports/jeremiah_2020.csv')
+report_21 = pd.read_csv('G:/My Drive/Py Projects/nfl-draft-preview/data/scoutingreports/jeremiah_2021.csv')
+report_22 = pd.read_csv('G:/My Drive/Py Projects/nfl-draft-preview/data/scoutingreports/jeremiah_2022.csv')
+report_23 = pd.read_csv('G:/My Drive/Py Projects/nfl-draft-preview/data/scoutingreports/jeremiah_2023.csv')
+report_24 = pd.read_csv('G:/My Drive/Py Projects/nfl-draft-preview/data/scoutingreports/jeremiah_2024.csv')
+report_25 = pd.read_csv('G:/My Drive/Py Projects/nfl-draft-preview/data/scoutingreports/jeremiah_2025.csv')
+stopwords = pd.read_csv('G:/My Drive/Py Projects/nfl-draft-preview/data/stopwords.csv')
 
 # Combine reports
 reports_past = pd.concat([report_20, report_21, report_22, report_23, report_24])
@@ -219,9 +220,12 @@ reports_past['report_lemmatized'] = reports_past['Report'].apply(lemmatize_text)
 
 # Remove stopwords
 reports_past['report_lemmatized'] = reports_past['report_lemmatized'].apply(lambda x: [item for item in x if item not in stopwords['stopword'].values])
+
+# Define dataframe
+xgb_df = reports_past[['report_lemmatized', 'first_rounder']].copy()
 ```
 
-The next step is to convert the text into a format that can be used in a machine learning model. The TfidfVectorizer will be used to convert the text into a matrix of TF-IDF features.
+After this I convert the text into a format that can be used in a machine learning model. The TfidfVectorizer will be used to convert the text into a matrix of TF-IDF features.
 
 ```{python}
 # Convert text to TF-IDF features
@@ -248,7 +252,6 @@ xgb_clf.fit(X_train, y_train)
 # Create basic predictions
 y_pred = xgb_clf.predict(X_test)
 initial_accuracy = accuracy_score(y_test, y_pred)
-print(f'Initial accuracy: {initial_accuracy * 100:.2f}%')
 
 # Check confusion matrix  to see where the model struggles
 conf_matrix = confusion_matrix(y_test, y_pred)
@@ -256,9 +259,13 @@ cm_display = ConfusionMatrixDisplay(conf_matrix).plot()
 plt.show()
 ```
 
+The initial accuracy of the model is `{python} initial_accuracy * 100`%. This is a good starting point, but the model can be further tuned to improve accuracy.
+
 After this, the model can be tuned to find the best hyperparameters.
 
 ```{python}
+#:| output : false
+
 # Split validation set from training set
 X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=102701)
 
@@ -414,10 +421,14 @@ xgb_final = xgb.XGBClassifier(max_depth = 10, min_child_weight = 1, learning_rat
 xgb_final.fit(X_train, y_train, eval_set=[(X_val, y_val)], verbose=True)
 # Predict on test set
 y_pred = xgb_final.predict(X_test)
+```
+
+```{python}
 # Calculate accuracy
 accuracy = accuracy_score(y_test, y_pred)
-print(f'Accuracy: {accuracy * 100:.2f}%')
 ```
+
+The accuracy for the tuned model is `{python} accuracy * 100`%.
 
 The now tuned model can be used to predict the likelihood of a player going in the first round based on their scouting report for the 2025 class.
 
@@ -447,7 +458,8 @@ Now that the heavy lifting is done from building the model, the results are read
 
 ```{python}
 # Display the ranked prospects
-print(report_25_ranked[['Name', 'first_rounder_proba']])
+ranked = pd.read_csv('G:/My Drive/Py Projects/nfl-draft-preview/data/scoutingreports/jeremiah_2025_ranked.csv')
+print(ranked.to_markdown())
 ```
 
 Now that we know how the model feels about the 2025 prospects, it is important to remember that this is just one model and one person's opinion. Fully tuned the model was still only 54% accurate. Despite this, the importance of machine learning interpretability cannot be understated, so let's take a look at the SHAP values to see what the model is thinking.
