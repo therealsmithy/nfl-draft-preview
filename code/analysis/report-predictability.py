@@ -250,6 +250,9 @@ report_25_ranked = report_25.sort_values(by='first_rounder_proba', ascending=Fal
 # Display the ranked prospects
 print(report_25_ranked[['Name', 'first_rounder_proba']])
 
+# Save the ranked prospects
+report_25_ranked[['Name', 'first_rounder_proba']].to_csv('data/scoutingreports/jeremiah_2025_ranked.csv', index=False)
+
 # Get SHAP values
 explainer = shap.Explainer(xgb_final)
 shap_values = explainer(df_tfidf_25)
